@@ -1,0 +1,13 @@
+name = "LienardWiechert"
+uuid = "373cdea9-c319-46c2-ac9a-44633fd30edf"
+authors = ["Wolfgang Hogger"]
+version = "1.0.0-DEV"
+
+[compat]
+julia = "1.10.10"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
