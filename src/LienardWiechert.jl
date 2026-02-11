@@ -54,6 +54,19 @@ function retarded_time(spacetime_point, c::SpaceTimeCurve)
             "Spacetime point is outside the light cone of curve start. No retarded time solution exists."))
     end
 
+    end_distance_squared = minkowski_distance_squared(
+        spacetime_point, 
+        [c.t[end], c.x[end], c.y[end], c.z[end]])
+
+    if end_distance_squared > 0
+        throw(ArgumentError(
+            "Curve never crosses past light cone of spacetime point. No retarded time solution exists."))
+    end
+
+    return retarded_time_nochecks(spacetime_point, c)
+end
+
+function retarded_time_nochecks(spacetime_point, c::SpaceTimeCurve)
     for i in eachindex(c.t)
         d2 = minkowski_distance_squared(spacetime_point, [c.t[i], c.x[i], c.y[i], c.z[i]])
         if d2 < 0
@@ -64,11 +77,7 @@ function retarded_time(spacetime_point, c::SpaceTimeCurve)
             return root_linear_interpolation(d1, c.t[i-1], d2, c.t[i])
         end
     end
-
-
-    # If we reach here, the spacetime point is outside the light cone of the entire curve
-    throw(ArgumentError(
-        "Spacetime point is outside the light cone of the entire curve. No retarded time solution exists."))
+    return convert(eltype(c.t), NaN)
 end
 
 end
