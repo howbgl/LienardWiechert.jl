@@ -35,7 +35,32 @@ end
 
 function WorldLine(args::Vararg{AbstractVector{<:Real}, 4})
     args = promote(args...)
-    WorldLine{eltype(args[1])}(args...)
+    WorldLine(collect.(args)...)
 end
 
 Base.:(==)(c1::WorldLine, c2::WorldLine) = c1.data == c2.data
+
+Base.getproperty(c::WorldLine, sym::Symbol) = 
+    if sym == :t
+        c.data[:, 1]
+    elseif sym == :x
+        c.data[:, 2]
+    elseif sym == :y
+        c.data[:, 3]
+    elseif sym == :z
+        c.data[:, 4]
+    else
+        getfield(c, sym)
+    end
+
+function Base.show(io::IO, wl::WorldLine{T}) where T
+    print(io, "WorldLine{$T} with $(size(wl.data, 1)) points.")
+end
+
+function Base.show(io::IO, ::MIME"text/plain", wl::WorldLine{T}) where T
+    println(io, 
+    "WorldLine{$T} with $(size(wl.data, 1)) points. Columns are [t, x, y, z] with data:")
+
+    recur_io = IOContext(io, :SHOWN_SET => wl)
+    Base.print_array(recur_io, wl.data)
+end
