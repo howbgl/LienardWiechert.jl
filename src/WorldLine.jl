@@ -53,6 +53,17 @@ Base.getproperty(c::WorldLine, sym::Symbol) =
         getfield(c, sym)
     end
 
+function Base.isapprox(
+    wl1::WorldLine{T},
+    wl2::WorldLine{U};
+    atol::Real=0,
+    rtol=atol>0 ? 0 : √eps(promote_type(T,U)),
+    nans::Bool=false) where {T,U}
+    
+    @argcheck size(wl1.data) == size(wl2.data) "WorldLines must have the same length."
+    return all(isapprox.(wl1.data, wl2.data; atol=atol, rtol=rtol, nans=nans))
+end
+
 function Base.show(io::IO, wl::WorldLine{T}) where T
     print(io, "WorldLine{$T} with $(size(wl.data, 1)) points.")
 end

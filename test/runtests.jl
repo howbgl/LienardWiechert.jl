@@ -15,5 +15,6 @@ using Test
         @test_throws ArgumentError WorldLine(t_unordered, x, y, z)
         @test_throws ArgumentError WorldLine(0.1 .* t, x, y, z) # Speed > c
         @test WorldLine(t, x, y, z) == WorldLine(hcat(t, x, y, z))
+        @test WorldLine(t, x, y, z) ≈ WorldLine(t, x, y, z .+ 1e-15)
     end
 end
