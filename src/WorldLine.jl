@@ -34,11 +34,7 @@ function WorldLine(t::Vector{T}, x::Vector{T}, y::Vector{T}, z::Vector{T}) where
     return WorldLine{T}(data)
 end
 
-function WorldLine(args::Vararg{AbstractVector{<:Real}, 4})
-    args = promote(args...)
-    WorldLine(collect.(args)...)
-end
-
+WorldLine(args::Vararg{AbstractVector{<:Real}, 4}) = WorldLine(promote(collect.(args)...)...)
 
 ##### Base methods
 
