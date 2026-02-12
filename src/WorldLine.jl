@@ -17,6 +17,7 @@ struct WorldLine{T}
     function WorldLine{T}(data::Matrix{T}) where T
         @argcheck size(data, 2) == 4 "Data matrix must have 4 columns (t, x, y, z)."
         @argcheck all(diff(data[:, 1]) .> 0) "Time vector (first column) must have strictly increasing values."
+        @argcheck _below_lightspeed(data) "WorldLine must be below the speed of light (c=1)."
         return new{T}(data)
     end
 end
@@ -37,6 +38,9 @@ function WorldLine(args::Vararg{AbstractVector{<:Real}, 4})
     args = promote(args...)
     WorldLine(collect.(args)...)
 end
+
+
+##### Base methods
 
 Base.:(==)(c1::WorldLine, c2::WorldLine) = c1.data == c2.data
 
@@ -63,4 +67,12 @@ function Base.show(io::IO, ::MIME"text/plain", wl::WorldLine{T}) where T
 
     recur_io = IOContext(io, :SHOWN_SET => wl)
     Base.print_array(recur_io, wl.data)
+end
+
+### Helper functions
+
+function _below_lightspeed(points::Matrix{<:Real})
+    diffs = diff(points, dims=1)
+    norms = sqrt.(sum(diffs[:, 2:end].^2, dims=2))
+    return all(norms .< diffs[:, 1]) # Check if speed < c (=1)
 end

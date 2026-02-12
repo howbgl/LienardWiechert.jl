@@ -13,7 +13,7 @@ using Test
     @testset "WorldLine constructors" begin
 
         @test_throws ArgumentError WorldLine(t_unordered, x, y, z)
-
+        @test_throws ArgumentError WorldLine(0.1 .* t, x, y, z) # Speed > c
         @test WorldLine(t, x, y, z) == WorldLine(hcat(t, x, y, z))
     end
 end
