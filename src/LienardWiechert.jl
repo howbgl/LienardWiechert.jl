@@ -76,7 +76,7 @@ function potential(spacetime_point, c::WorldLine)
     β  = r[5:7]
 
     denom = norm(R) * (1 - dot(eR, β))
-    return [r[1] / denom; β ./ denom]
+    return [1 / denom; β ./ denom]
 end
 
 function snapshot_2d(xs,ys,z0,t,wl::WorldLine)
