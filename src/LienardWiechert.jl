@@ -16,6 +16,7 @@ function minkowski_dot(x1, x2)
     return x1[1]*x2[1] - sum(x1[2:end] .* x2[2:end])
 end
 
+"Fit a linear function to two points (x1,t1) and (x2,t2) and return the root (t when x=0)."
 function root_linear_interpolation(x1, t1, x2, t2)
     return t1 - x1 * (t2 - t1) / (x2 - x1)
 end
@@ -50,7 +51,6 @@ function retarded_time_nochecks(spacetime_point, c::WorldLine)
     for i in eachindex(c.t)
         d2 = minkowski_distance_squared(spacetime_point, [c.t[i], c.x[i], c.y[i], c.z[i]])
         if d2 < 0
-            # return (c.t[i-1] + c.t[i]) / 2
             d1 = minkowski_distance_squared(
                 spacetime_point, 
                 [c.t[i-1], c.x[i-1], c.y[i-1], c.z[i-1]])
@@ -58,6 +58,10 @@ function retarded_time_nochecks(spacetime_point, c::WorldLine)
         end
     end
     return convert(eltype(c.t), NaN)
+end
+
+function potential(spacetime_point, c::WorldLine)
+    
 end
 
 end
