@@ -3,6 +3,8 @@ module LienardWiechert
 using ArgCheck
 using LinearAlgebra
 
+export potential, retarded_time, snapshot_2d
+
 include("WorldLine.jl")
 
 "Calculate the Minkowski distance squared between two spacetime points, (+---) signature."
@@ -35,16 +37,13 @@ function retarded_time(spacetime_point, c::WorldLine)
             "Spacetime point is outside the light cone of curve start. No retarded time solution exists."))
     end
 
-    end_distance_squared = minkowski_distance_squared(
-        spacetime_point, 
-        [c.t[end], c.x[end], c.y[end], c.z[end]])
+    tr = retarded_time_nochecks(spacetime_point, c)
 
-    if end_distance_squared > 0
+    if isnan(tr)
         throw(ArgumentError(
-            "Curve never crosses past light cone of spacetime point. No retarded time solution exists."))
+            "Curve never crosses past light cone of spacetime point. No retarded time solution exists."))        
     end
-
-    return retarded_time_nochecks(spacetime_point, c)
+    return tr
 end
 
 function retarded_time_nochecks(spacetime_point, c::WorldLine)
@@ -60,8 +59,35 @@ function retarded_time_nochecks(spacetime_point, c::WorldLine)
     return convert(eltype(c.t), NaN)
 end
 
+function interpolate_worldline(t::Real, c::WorldLine)
+    @argcheck t >= c.t[1] && t <= c.t[end] "Interpolation time is outside the worldline range."
+    for i in eachindex(c.t)
+        if c.t[i] > t
+            return c.data[i-1, :] .+ (t - c.t[i-1]) * (c.data[i, :] .- c.data[i-1, :]) / (c.t[i] - c.t[i-1])
+        end
+    end
+end
+
 function potential(spacetime_point, c::WorldLine)
-    
+    tr = retarded_time(spacetime_point, c)
+    r  = interpolate_worldline(tr, c)
+    R  = spacetime_point[2:4] .- r[2:4]
+    eR = normalize(R)
+    β  = r[5:7]
+
+    denom = norm(R) * (1 - dot(eR, β))
+    return [r[1] / denom; β ./ denom]
+end
+
+function snapshot_2d(xs,ys,z0,t,wl::WorldLine)
+    pts = [zeros(4) for _ in xs, _ in ys]
+    for i in eachindex(xs)
+        println("Calculating potential for x=$(xs[i])...")
+        Threads.@threads for j in eachindex(ys)
+            pts[i,j] = potential([t, xs[i], ys[j], z0], wl)
+        end
+    end
+    return pts
 end
 
 end
